@@ -84,6 +84,7 @@
 #include <algorithm>
 #include <iostream>
 #include <optional>
+#include <set>
 
 #include "table.hpp"
 
@@ -281,9 +282,34 @@ Rates GetRates(const Input& input, std::span<const Rational> uses) {
   return rates;
 }
 
+void Verify(const Input& input) {
+  std::set<std::string_view> required;
+  std::set<std::string_view> producible;
+  for (const auto& [resource, rate] : input.demands) {
+    if (rate > 0) required.insert(resource);
+  }
+  for (const auto& recipe : input.recipes) {
+    for (const auto& [resource, quantity] : recipe.inputs) {
+      if (quantity > 0) required.insert(resource);
+    }
+    for (const auto& [resource, quantity] : recipe.outputs) {
+      if (quantity > 0) producible.insert(resource);
+    }
+  }
+  bool valid = true;
+  for (std::string_view resource : required) {
+    if (!producible.contains(resource)) {
+      std::cerr << "error: no recipe for " << resource << '\n';
+      valid = false;
+    }
+  }
+  if (!valid) std::exit(1);
+}
+
 }  // namespace
 
 std::optional<Solution> Solve(const Input& input) {
+  Verify(input);
   // Retrieve the list of resources referenced by the input problem. The order
   // of elements in this list will determine the column order in the tableau.
   const std::vector<std::string_view> resources = Resources(input);
