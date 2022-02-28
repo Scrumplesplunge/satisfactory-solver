@@ -1,26 +1,26 @@
 // Human
-0 HumanEffort -> 1 Mycelia (1s, cost 100)
-0 HumanEffort -> 1 Biomass (1s, cost 100)
+(HumanEffort) -> 1 Mycelia (1s, cost 100)
+(HumanEffort) -> 1 Biomass (1s, cost 100)
 
 // Miner
-0 ResourceNode -> 1 Coal (1s, cost 5)
-0 ResourceNode -> 1 CopperOre (1s, cost 5)
-0 ResourceNode -> 1 IronOre (1s, cost 5)
-0 ResourceNode -> 1 Limestone (1s, cost 5)
-0 ResourceNode -> 1 CateriumOre (1s, cost 5)
-0 ResourceNode -> 1 RawQuartz (1s, cost 5)
-0 ResourceNode -> 1 Bauxite (1s, cost 5)
-0 ResourceNode -> 1 Sulfur (1s, cost 5)
-0 ResourceNode -> 1 Uranium (1s, cost 5)
+(ResourceNode) -> 1 Coal (1s, cost 5)
+(ResourceNode) -> 1 CopperOre (1s, cost 5)
+(ResourceNode) -> 1 IronOre (1s, cost 5)
+(ResourceNode) -> 1 Limestone (1s, cost 5)
+(ResourceNode) -> 1 CateriumOre (1s, cost 5)
+(ResourceNode) -> 1 RawQuartz (1s, cost 5)
+(ResourceNode) -> 1 Bauxite (1s, cost 5)
+(ResourceNode) -> 1 Sulfur (1s, cost 5)
+(ResourceNode) -> 1 Uranium (1s, cost 5)
 
 // Water Extractor
-0 BodyOfWater -> 2 Water (1s, cost 20)
+(BodyOfWater) -> 2 Water (1s, cost 20)
 
 // Oil Extractor
-0 ResourceNode -> 2 CrudeOil (1s, cost 40)
+(ResourceNode) -> 2 CrudeOil (1s, cost 40)
 
 // Resource Well Pressurizer
-0 ResourceWell -> 1 NitrogenGas (1s, cost 150)
+(ResourceWell) -> 1 NitrogenGas (1s, cost 150)
 
 // Smelter
 1 CopperOre -> 1 CopperIngot (2s, cost 4)

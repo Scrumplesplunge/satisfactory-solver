@@ -29,11 +29,20 @@ class Parser {
   }
 
   std::pair<std::string_view, int> ParseItemCount() {
-    const int count = ParseInt();
-    SkipWhitespace();
-    const std::string_view resource_name =
-        Sequence<IsIdentifier>("expected a resource name");
-    return {resource_name, count};
+    if (ConsumePrefix("(")) {
+      SkipWhitespace();
+      const std::string_view resource_name =
+          Sequence<IsIdentifier>("expected a primitive resource name");
+      SkipWhitespace();
+      if (!ConsumePrefix(")")) Die("expected ')'");
+      return {resource_name, 0};
+    } else {
+      const int count = ParseInt();
+      SkipWhitespace();
+      const std::string_view resource_name =
+          Sequence<IsIdentifier>("expected a resource name");
+      return {resource_name, count};
+    }
   }
 
   Recipe ParseRecipe() {
@@ -79,10 +88,10 @@ class Parser {
     SkipWhitespaceAndComments();
     while (!remaining_.empty()) {
       const char lookahead = remaining_.front();
-      if (IsDigit(lookahead)) {
-        input.recipes.push_back(ParseRecipe());
-      } else {
+      if (IsAlpha(lookahead)) {
         input.demands.push_back(ParseDemand());
+      } else {
+        input.recipes.push_back(ParseRecipe());
       }
       SkipWhitespaceAndComments();
     }

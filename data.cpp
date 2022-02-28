@@ -17,7 +17,11 @@ std::ostream& operator<<(std::ostream& output, ResourceList list) {
     } else {
       output << " + ";
     }
-    output << quantity << ' ' << resource;
+    if (quantity > 0) {
+      output << quantity << ' ' << resource;
+    } else {
+      output << '(' << resource << ')';
+    }
   }
   return output;
 }
