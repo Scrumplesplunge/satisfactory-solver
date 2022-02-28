@@ -1,0 +1,151 @@
+// Human
+(HumanEffort) -> 1 Mycelia (1 s/run, cost 100)
+(HumanEffort) -> 1 Biomass (1 s/run, cost 100)
+
+// Miner
+(ResourceNode) -> 1 Coal (1 s/run, cost 5)
+(ResourceNode) -> 1 CopperOre (1 s/run, cost 5)
+(ResourceNode) -> 1 IronOre (1 s/run, cost 5)
+(ResourceNode) -> 1 Limestone (1 s/run, cost 5)
+(ResourceNode) -> 1 CateriumOre (1 s/run, cost 5)
+(ResourceNode) -> 1 RawQuartz (1 s/run, cost 5)
+(ResourceNode) -> 1 Bauxite (1 s/run, cost 5)
+(ResourceNode) -> 1 Sulfur (1 s/run, cost 5)
+(ResourceNode) -> 1 Uranium (1 s/run, cost 5)
+
+// Water Extractor
+(BodyOfWater) -> 2 Water (1 s/run, cost 20)
+
+// Oil Extractor
+(ResourceNode) -> 2 CrudeOil (1 s/run, cost 40)
+
+// Resource Well Pressurizer
+(ResourceWell) -> 1 NitrogenGas (1 s/run, cost 150)
+
+// Smelter
+1 CopperOre -> 1 CopperIngot (2 s/run, cost 4)
+1 IronOre -> 1 IronIngot (2 s/run, cost 4)
+3 CateriumOre -> 1 CateriumIngot (4 s/run, cost 4)
+
+// Constructor
+3 AluminumIngot -> 2 AluminumCasing (2 s/run, cost 4)
+2 Wire -> 1 Cable (2 s/run, cost 4)
+3 Limestone -> 1 Concrete (4 s/run, cost 4)
+2 CopperIngot -> 1 CopperSheet (6 s/run, cost 4)
+3 IronIngot -> 2 IronPlate (6 s/run, cost 4)
+1 IronIngot -> 1 IronRod (4 s/run, cost 4)
+2 Plastic -> 4 EmptyCanister (4 s/run, cost 4)
+1 CateriumIngot -> 5 Quickwire (5 s/run, cost 4)
+5 RawQuartz -> 3 QuartzCrystal (8 s/run, cost 4)
+1 IronRod -> 4 Screw (6 s/run, cost 4)
+4 SteelIngot -> 1 SteelBeam (4 s/run, cost 4)
+3 SteelIngot -> 2 SteelPipe (6 s/run, cost 4)
+1 CopperIngot -> 2 Wire (4 s/run, cost 4)
+3 RawQuartz -> 5 Silica (8 s/run, cost 4)
+30 CopperIngot -> 5 CopperPowder (6 s/run, cost 4)
+1 SteelBeam -> 52 Screw (12 s/run, cost 4)
+
+// Foundry
+6 AluminumScrap + 5 Silica -> 4 AluminumIngot (4 s/run, cost 16)
+3 IronOre + 3 Coal -> 3 SteelIngot (4 s/run, cost 16)
+
+// Assembler
+3 AluminumIngot + 1 CopperIngot -> 3 AlcladAluminumSheet (6 s/run, cost 15)
+2 CopperSheet + 4 Plastic -> 1 CircuitBoard (8 s/run, cost 15)
+5 AlcladAluminumSheet + 3 CopperSheet -> 1 HeatSink (8 s/run, cost 15)
+3 Stator + 2 AiLimiter -> 2 ElectromagneticControlRod (30 s/run, cost 15)
+3 SteelPipe + 8 Wire -> 1 Stator (12 s/run, cost 15)
+5 CopperSheet + 20 Quickwire -> 1 AiLimiter (12 s/run, cost 15)
+4 SteelBeam + 5 Concrete -> 1 EncasedIndustrialBeam (10 s/run, cost 15)
+1 Mycelia + 5 Biomass -> 1 Fabric (4 s/run, cost 15)
+3 ReinforcedIronPlate + 12 IronRod -> 2 ModularFrame (60 s/run, cost 15)
+2 Rotor + 2 Stator -> 1 Motor (12 s/run, cost 15)
+6 IronPlate + 12 Screw -> 1 ReinforcedIronPlate (12 s/run, cost 15)
+5 IronRod + 25 Screw -> 1 Rotor (15 s/run, cost 15)
+1 ReinforcedIronPlate + 1 Rotor -> 1 SmartPlating (30 s/run, cost 15)
+1 ModularFrame + 12 SteelBeam -> 2 VersatileFramework (24 s/run, cost 15)
+1 Stator + 20 Cable -> 1 AutomatedWiring (24 s/run, cost 15)
+2 AdaptiveControlUnit + 1 Supercomputer -> 1 AssemblyDirectorSystem (80 s/run, cost 15)
+1 FusedModularFrame + 2 RadioControlUnit -> 1 PressureConversionCube (60 s/run, cost 15)
+
+// Manufacturer
+10 CircuitBoard + 9 Cable + 18 Plastic + 52 Screw -> 1 Computer (24 s/run, cost 55)
+5 Coal + 2 Rubber + 2 Fabric -> 1 GasFilter (8 s/run, cost 55)
+5 ModularFrame + 15 SteelPipe -> 1 HeavyModularFrame (30 s/run, cost 55)
+32 AluminumCasing + 1 CrystalOscillator + 1 Computer -> 2 RadioControlUnit (48 s/run, cost 55)
+36 QuartzCrystal + 28 Cable + 5 ReinforcedIronPlate -> 2 CrystalOscillator (120 s/run, cost 55)
+2 Computer + 2 AiLimiter + 3 HighSpeedConnector + 28 Plastic -> 1 Supercomputer (32 s/run, cost 55)
+56 Quickwire + 10 Cable + 1 CircuitBoard -> 1 HighSpeedConnector (16 s/run, cost 55)
+4 CoolingSystem + 2 RadioControlUnit + 4 Motor + 24 Rubber -> 1 TurboMotor (32 s/run, cost 55)
+2 Motor + 15 Rubber + 2 SmartPlating -> 1 ModularEngine (60 s/run, cost 55)
+15 AutomatedWiring + 10 CircuitBoard + 2 HeavyModularFrame + 2 Computer -> 2 AdaptiveControlUnit (120 s/run, cost 55)
+5 VersatileFramework + 2 ElectromagneticControlRod + 10 Battery -> 2 MagneticFieldGenerator (120 s/run, cost 55)
+5 ModularEngine + 2 TurboMotor + 6 CoolingSystem + 2 FusedModularFrame -> 2 ThermalPropulsionRocket (120 s/run, cost 55)
+3 IronPlate + 1 IronRod + 15 Wire + 2 Cable -> 1 Beacon (8 s/run, cost 55)
+
+// Blender
+2 HeatSink + 2 Rubber + 5 Water + 25 NitrogenGas -> 1 CoolingSystem (10 s/run, cost 75)
+1 HeavyModularFrame + 50 AluminumCasing + 25 NitrogenGas -> 1 FusedModularFrame (40 s/run, cost 75)
+2.5 SulfuricAcid + 2 AluminaSolution + 1 AluminumCasing -> 1 Battery + 1.5 Water (3 s/run, cost 75)
+10 Uranium + 3 Concrete + 8 SulfuricAcid -> 5 EncasedUraniumCell + 2 SulfuricAcid (12 s/run, cost 75)
+
+// Packager
+2 Fuel + 2 EmptyCanister -> 2 PackagedFuel (3 s/run, cost 10)
+2 PackagedFuel -> 2 Fuel + 2 EmptyCanister (2 s/run, cost 10)
+2 AluminaSolution + 2 EmptyCanister -> 2 PackagedAluminaSolution (1 s/run, cost 10)
+2 PackagedAluminaSolution -> 2 AluminaSolution + 2 EmptyCanister (1 s/run, cost 10)
+
+// Refinery
+5 CrudeOil -> 4 Fuel + 3 PolymerResin (6 s/run, cost 30)
+6 HeavyOilResidue -> 4 Fuel (6 s/run, cost 30)
+3 CrudeOil -> 2 Plastic + 1 HeavyOilResidue (6 s/run, cost 30)
+6 PolymerResin + 2 Water -> 2 Plastic (6 s/run, cost 30)
+3 CrudeOil -> 2 Rubber + 2 HeavyOilResidue (6 s/run, cost 30)
+4 PolymerResin + 4 Water -> 2 Rubber (6 s/run, cost 30)
+4 AluminaSolution + 2 Coal -> 6 AluminumScrap + 2 Water (1 s/run, cost 30)
+12 Bauxite + 18 Water -> 12 AluminaSolution + 5 Silica (6 s/run, cost 30)
+5 Sulfur + 5 Water -> 5 SulfuricAcid (6 s/run, cost 30)
+
+// Particle Accelerator
+200 CopperPowder + 1 PressureConversionCube -> 1 NuclearPasta (120 s/run, cost 1000)
+
+// Build Gun Demands
+Cable                      (30 units/min)   // Power Cables
+Concrete                   (30 units/min)   // Foundations
+CopperSheet                (30 units/min)   // Pipeline Mk1
+IronPlate                  (30 units/min)   // Conveyor Mk1
+Plastic                    (30 units/min)   // Pipeline Mk2
+ReinforcedIronPlate        (30 units/min)   // Conveyor Mk2
+SteelBeam                  (30 units/min)   // Conveyor Mk3
+SteelPipe                  (30 units/min)   // Hypertube
+
+AiLimiter                  (10 units/min)   // Smart Splitter
+AlcladAluminumSheet        (10 units/min)   // Conveyor Mk5
+EncasedIndustrialBeam      (10 units/min)   // Conveyor Mk4
+IronRod                    (10 units/min)   // Merger
+ModularFrame               (10 units/min)   // Foundry
+QuartzCrystal              (10 units/min)   // Signs
+Quickwire                  (10 units/min)   // Lights
+Screw                      (10 units/min)   // Chainsaw
+Wire                       (10 units/min)   // Smelter
+
+Rotor                      (2 units/min)    // Smart Splitter
+Motor                      (2 units/min)    // Manufacturer
+HeavyModularFrame          (2 units/min)    // Manufacturer
+Rubber                     (2 units/min)    // Tools
+Silica                     (2 units/min)    // Windows
+Stator                     (2 units/min)    // Power Storage
+
+AluminumCasing             (1 units/min)    // Blender
+Beacon                     (1 units/min)    // Vehicles and tools
+CircuitBoard               (1 units/min)    // Tools
+Computer                   (1 units/min)    // Vehicles and tools
+CrystalOscillator          (1 units/min)    // Vehicles
+FusedModularFrame          (1 units/min)    // Miner Mk3
+HighSpeedConnector         (1 units/min)    // Drone Port, Geothermal Generator
+RadioControlUnit           (1 units/min)    // Drones
+
+CoolingSystem              (1/5 units/min)  // Particle Accelerator
+ElectromagneticControlRod  (1/5 units/min)  // Particle Accelerator
+Supercomputer              (1/5 units/min)  // Miner Mk3
+TurboMotor                 (1/5 units/min)  // Miner Mk3
