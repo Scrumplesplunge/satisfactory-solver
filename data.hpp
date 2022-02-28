@@ -31,9 +31,11 @@ struct Solution {
   // uses[i] is the total fractional throughput of input->recipes[i] required by
   // this solution.
   std::vector<Rational> uses;
-  // Rate, in units/min, of consumption (inputs) or production (outputs) for the
-  // resource of the given name.
-  std::map<std::string_view, Rational> inputs, outputs;
+  // Rate, in units/min, of total production or net production for each
+  // resource. Net production will meet the configured demand, while total
+  // production will meet the configured demand in addition to meeting the
+  // intermediate demand for the recipes that have been used.
+  std::map<std::string_view, Rational> total, net;
   // The total cost of this solution.
   Rational cost;
 };

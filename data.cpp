@@ -1,5 +1,6 @@
 #include "data.hpp"
 
+#include <iomanip>
 #include <iostream>
 
 namespace satisfactory {
@@ -52,23 +53,30 @@ std::ostream& operator<<(std::ostream& output, const Input& input) {
 }
 
 std::ostream& operator<<(std::ostream& output, const Solution& solution) {
-  output << "Produce:\n";
-  for (const auto& [name, rate] : solution.outputs) {
-    output << "  " << name << " (" << double(rate) << "/min)\n";
-  }
-  output << "From:\n";
-  for (const auto& [name, rate] : solution.inputs) {
-    output << "  " << name << " (" << double(rate) << "/min)\n";
-  }
-  output << "With:\n";
+  output << "Recipe Uses:\n\n";
+  output << std::setw(12) << "Uses" << '\t' << "Recipe\n";
   const int r = solution.input->recipes.size();
   for (int i = 0; i < r; i++) {
     if (solution.uses[i] != 0) {
-      output << "  " << double(solution.uses[i]) << "x\t"
+      output << "  " << std::setw(10) << solution.uses[i] << '\t'
              << solution.input->recipes[i] << '\n';
     }
   }
-  output << "For a total cost of " << double(solution.cost);
+  output << "\nTotal Production (units/min):\n\n";
+  output << std::setw(12) << "units/min" << '\t' << "Resource\n";
+  for (const auto& [name, rate] : solution.total) {
+    if (rate != 0) {
+      output << "  " << std::setw(10) << rate << '\t' << name << '\n';
+    }
+  }
+  output << "\nNet Production:\n\n";
+  output << std::setw(12) << "units/min" << '\t' << "Resource\n";
+  for (const auto& [name, rate] : solution.net) {
+    if (rate != 0) {
+      output << "  " << std::setw(10) << rate << '\t' << name << '\n';
+    }
+  }
+  output << "\nFor a total cost of " << solution.cost;
   return output;
 }
 

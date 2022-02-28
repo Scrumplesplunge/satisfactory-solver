@@ -25,15 +25,11 @@ int main(int argc, char* argv[]) {
   }
   const std::string source = GetContents(argv[1]);
   const satisfactory::Input input = satisfactory::ParseInput(source);
-  std::cout << "== Input ==\n"
-            << input << "\n";
   const std::optional<satisfactory::Solution> solution =
       satisfactory::Solve(input);
   if (!solution) {
-    std::cout << "== Infeasible ==\n"
-                 "A solution could not be found. Is a recipe missing?\n";
+    std::cerr << "A solution could not be found. Is a recipe missing?\n";
     return 1;
   }
-  std::cout << "== Solution ==\n"
-            << *solution << "\n";
+  std::cout << *solution << "\n";
 }

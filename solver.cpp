@@ -259,19 +259,23 @@ Rational GetCost(const Table<Rational>& tableau) {
   return tableau[tableau.height() - 1].back();
 }
 
-std::map<std::string_view, Rational> GetRates(const Input& input,
-                                              std::span<const Rational> uses) {
+struct Rates {
+  std::map<std::string_view, Rational> total, net;
+};
+
+Rates GetRates(const Input& input, std::span<const Rational> uses) {
   assert(input.recipes.size() == uses.size());
   const int r = uses.size();
-  std::map<std::string_view, Rational> rates;
+  Rates rates;
   for (int i = 0; i < r; i++) {
     const Recipe& recipe = input.recipes[i];
     // Populate the recipe rates.
     for (const auto& [resource, quantity] : recipe.inputs) {
-      rates[resource] -= uses[i] * quantity / recipe.duration;
+      rates.net[resource] -= 60 * uses[i] * quantity / recipe.duration;
     }
     for (const auto& [resource, quantity] : recipe.outputs) {
-      rates[resource] += uses[i] * quantity / recipe.duration;
+      rates.total[resource] += 60 * uses[i] * quantity / recipe.duration;
+      rates.net[resource] += 60 * uses[i] * quantity / recipe.duration;
     }
   }
   return rates;
@@ -290,19 +294,11 @@ std::optional<Solution> Solve(const Input& input) {
   if (!tableau) return std::nullopt;
   // Extract the optimal solution.
   std::vector<Rational> uses = ExtractSolution(*tableau);
-  std::map<std::string_view, Rational> rates = GetRates(input, uses);
-  std::map<std::string_view, Rational> inputs, outputs;
-  for (const auto& [resource, rate] : rates) {
-    if (rate < 0) {
-      inputs[resource] = -rate * 60;
-    } else if (rate > 0) {
-      outputs[resource] = rate * 60;
-    }
-  }
+  Rates rates = GetRates(input, uses);
   return Solution{.input = &input,
                   .uses = std::move(uses),
-                  .inputs = std::move(inputs),
-                  .outputs = std::move(outputs),
+                  .total = std::move(rates.total),
+                  .net = std::move(rates.net),
                   .cost = GetCost(*tableau)};
 }
 
