@@ -21,14 +21,30 @@ class Parser {
     }
   }
 
-  int ParseInt() {
+  std::int64_t ParseInt() {
     const std::string_view number = Sequence<IsDigit>("expected an integer");
-    int value = 0;
+    std::int64_t value = 0;
     for (char c : number) value = 10 * value + (c - '0');
     return value;
   }
 
-  std::pair<std::string_view, int> ParseItemCount() {
+  Rational ParseRational() {
+    Rational value = ParseInt();
+    if (ConsumePrefix(".")) {
+      Rational unit = 1;
+      for (char c : Sequence<IsDigit>("expected digits after decimal point")) {
+        unit /= 10;
+        value += (c - '0') * unit;
+      }
+      return value;
+    } else if (ConsumePrefix("/")) {
+      return value / ParseInt();
+    } else {
+      return value;
+    }
+  }
+
+  std::pair<std::string_view, Rational> ParseItemCount() {
     if (ConsumePrefix("(")) {
       SkipWhitespace();
       const std::string_view resource_name =
@@ -37,7 +53,7 @@ class Parser {
       if (!ConsumePrefix(")")) Die("expected ')'");
       return {resource_name, 0};
     } else {
-      const int count = ParseInt();
+      const Rational count = ParseRational();
       SkipWhitespace();
       const std::string_view resource_name =
           Sequence<IsIdentifier>("expected a resource name");
@@ -65,9 +81,13 @@ class Parser {
       if (!ConsumePrefix("+")) Die("expected '+' or '('");
       SkipWhitespace();
     }
-    result.duration = ParseInt();
-    if (!ConsumePrefix("s, cost ")) Die("expected '(<N>s, cost <N>)'");
-    result.cost = ParseInt();
+    result.duration = ParseRational();
+    SkipWhitespace();
+    if (!ConsumePrefix("s/run,")) Die("expected '(<N> s/run, cost <N>)'");
+    SkipWhitespace();
+    if (!ConsumePrefix("cost")) Die("expected '(<N> s/run, cost <N>)'");
+    SkipWhitespace();
+    result.cost = ParseRational();
     if (!ConsumePrefix(")")) Die("expected ')'");
     return result;
   }
@@ -78,8 +98,9 @@ class Parser {
         Sequence<IsIdentifier>("expected a resource name");
     SkipWhitespace();
     if (!ConsumePrefix("(")) Die("expected '('");
-    const int units_per_minute = ParseInt();
-    if (!ConsumePrefix("/min)")) Die("expected '(<N>/min)'");
+    const Rational units_per_minute = ParseRational();
+    SkipWhitespace();
+    if (!ConsumePrefix("units/min)")) Die("expected '(<N> units/min)'");
     return Demand(resource_name, units_per_minute);
   }
 

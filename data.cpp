@@ -7,7 +7,7 @@ namespace satisfactory {
 namespace {
 
 struct ResourceList {
-  const std::map<std::string_view, int>& value;
+  const std::map<std::string_view, Rational>& value;
 };
 
 std::ostream& operator<<(std::ostream& output, ResourceList list) {
@@ -32,11 +32,12 @@ std::ostream& operator<<(std::ostream& output, ResourceList list) {
 std::ostream& operator<<(std::ostream& output, const Recipe& recipe) {
   return output << ResourceList(recipe.inputs) << " -> "
                 << ResourceList(recipe.outputs) << " (" << recipe.duration
-                << "s, cost " << recipe.cost << ')';
+                << " s/run, cost " << recipe.cost << ')';
 }
 
 std::ostream& operator<<(std::ostream& output, const Demand& demand) {
-  return output << demand.name << " (" << demand.units_per_minute << "/min)";
+  return output << demand.name << " (" << demand.units_per_minute
+                << " units/min)";
 }
 
 std::ostream& operator<<(std::ostream& output, const Input& input) {
@@ -54,7 +55,7 @@ std::ostream& operator<<(std::ostream& output, const Input& input) {
 
 std::ostream& operator<<(std::ostream& output, const Solution& solution) {
   output << "Recipe Uses:\n\n";
-  output << std::setw(12) << "Uses" << '\t' << "Recipe\n";
+  output << std::setw(12) << "Machines" << '\t' << "Recipe\n";
   const int r = solution.input->recipes.size();
   for (int i = 0; i < r; i++) {
     if (solution.uses[i] != 0) {

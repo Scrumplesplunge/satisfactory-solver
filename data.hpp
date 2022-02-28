@@ -11,8 +11,8 @@
 namespace satisfactory {
 
 struct Recipe {
-  std::map<std::string_view, int> inputs, outputs;
-  int duration;
+  std::map<std::string_view, Rational> inputs, outputs;
+  Rational duration;
   Rational cost;
 };
 
