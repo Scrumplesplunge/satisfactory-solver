@@ -1,15 +1,22 @@
 #include "rational.hpp"
 
 #include <iostream>
+#include <sstream>
 
 namespace satisfactory {
 
 std::ostream& operator<<(std::ostream& output, const Rational& rational) {
-  output << rational.numerator();
-  if (std::int64_t d = rational.denominator(); d != 1) {
-    output << "/" << d;
+  std::ostringstream temp;
+  const std::int64_t quotient = rational.numerator() / rational.denominator();
+  const std::int64_t remainder = rational.numerator() % rational.denominator();
+  if (remainder == 0) {
+    temp << quotient;
+  } else if (quotient == 0) {
+    temp << remainder << '/' << rational.denominator();
+  } else {
+    temp << quotient << '+' << remainder << '/' << rational.denominator();
   }
-  return output;
+  return output << temp.str();
 }
 
 }  // namespace satisfactory
