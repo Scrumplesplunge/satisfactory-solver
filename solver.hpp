@@ -3,9 +3,11 @@
 
 #include "data.hpp"
 
+#include <optional>
+
 namespace satisfactory {
 
-Solution Solve(const Input& input);
+std::optional<Solution> Solve(const Input& input);
 
 }  // namespace satisfactory
 

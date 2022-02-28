@@ -169,16 +169,17 @@ Table<Rational> BuildTableau(std::span<const std::string_view> resources,
   return tableau;
 }
 
-int PivotColumn(const Table<Rational>& tableau) {
+std::optional<int> PivotColumn(const Table<Rational>& tableau) {
   // Find the column with the minimum value in the cost row. This will be the
   // pivot column (assuming that the tableau is not already optimal), as the
   // most negative column is the one which gives the largest improvement in
   // the cost function with respect to change in the corresponding variable.
   const std::span<const Rational> cost_row = tableau[tableau.height() - 1];
-  return std::ranges::min_element(cost_row) - cost_row.begin();
+  const auto i = std::ranges::min_element(cost_row);
+  return *i < 0 ? std::optional<int>(i - cost_row.begin()) : std::nullopt;
 }
 
-int PivotRow(const Table<Rational>& tableau, int column) {
+std::optional<int> PivotRow(const Table<Rational>& tableau, int column) {
   // Find the row with the minimum ratio between its constant term and its
   // coefficient in the pivot column. This minimum ratio test ensures that the
   // other basic variables remain positive (and therefore feasible) after the
@@ -191,14 +192,6 @@ int PivotRow(const Table<Rational>& tableau, int column) {
   for (int y = 0; y < tableau.height() - 1; y++) {
     const Rational coefficient = tableau[y][column];
     const Rational value = tableau[y].back();
-    // The value of the last column must be non-negative: since any intermediate
-    // tableau should represent a basic feasible solution, the value of the last
-    // column must be positive as this directly corresponds to the value of one
-    // of the variables, and all variables must be non-negative.
-    // Note that if the value is 0, we are considering a degenerate basic
-    // variable which will not increase the value of the cost function as part
-    // of this pivot.
-    assert(value >= 0);
     // Skip rows which have a non-positive coefficient: the entering variable
     // will have the new value `value / coefficient`, and it is required that
     // `value` is always positive for any feasible solution (which must be the
@@ -214,31 +207,35 @@ int PivotRow(const Table<Rational>& tableau, int column) {
   // variable is unbounded, and it has a positive contribution towards the score
   // function, hence there is would be no optimal solution. Since we know that
   // our primal problem is feasible, this can never happen.
-  assert(best);
-  return best->row;
+  return best ? std::optional<int>(best->row) : std::nullopt;
 }
 
 // Optimize a Simplex tableau.
-Table<Rational> Solve(Table<Rational> tableau) {
+std::optional<Table<Rational>> Solve(Table<Rational> tableau) {
   const std::span<const Rational> cost_row = tableau[tableau.height() - 1];
   while (true) {
     const Rational previous_score = tableau[tableau.height() - 1].back();
-    const int column = PivotColumn(tableau);
-    if (cost_row[column] >= 0) {
-      // If there are no negative weights left in the cost row, the tableau is
-      // already optimal.
-      return tableau;
-    }
-    const int row = PivotRow(tableau, column);
+    const std::optional<int> column = PivotColumn(tableau);
+    // If we can't identify a pivot column, the tableau is optimal.
+    if (!column) return tableau;
+    const std::optional<int> row = PivotRow(tableau, *column);
+    if (!row) return std::nullopt;
     // Use Gaussian elimination to turn the pivot column into the row'th column
     // of the identity matrix.
-    Multiply(tableau[row], 1 / tableau[row][column]);
-    assert(tableau[row][column] == 1);
+    Multiply(tableau[*row], 1 / tableau[*row][*column]);
+    assert(tableau[*row][*column] == 1);
     for (int y = 0; y < tableau.height(); y++) {
-      if (y == row) continue;
-      assert(tableau[y].back() >= tableau[y][column] * tableau[row].back());
-      AddMultiple(tableau[y], tableau[row], -tableau[y][column]);
-      assert(tableau[y][column] == 0);
+      if (y == *row) continue;
+      // The value of the last column must be non-negative: since any
+      // intermediate tableau should represent a basic feasible solution, the
+      // value of the last column must be positive as this directly corresponds
+      // to the value of one of the variables, and all variables must be
+      // non-negative. Note that the value can be 0, and in this case we are
+      // considering a degenerate basic variable which will not increase the
+      // value of the cost function as part of this pivot.
+      assert(tableau[y].back() >= tableau[y][*column] * tableau[*row].back());
+      AddMultiple(tableau[y], tableau[*row], -tableau[y][*column]);
+      assert(tableau[y][*column] == 0);
     }
     const Rational score = tableau[tableau.height() - 1].back();
     assert(score >= previous_score);
@@ -282,16 +279,17 @@ std::map<std::string_view, Rational> GetRates(const Input& input,
 
 }  // namespace
 
-Solution Solve(const Input& input) {
+std::optional<Solution> Solve(const Input& input) {
   // Retrieve the list of resources referenced by the input problem. The order
   // of elements in this list will determine the column order in the tableau.
   const std::vector<std::string_view> resources = Resources(input);
   // Convert the problem into a Simplex tableau for the dual problem and
   // optimize it.
-  Table<Rational> tableau = BuildTableau(resources, input);
-  tableau = Solve(std::move(tableau));
+  const std::optional<Table<Rational>> tableau =
+      Solve(BuildTableau(resources, input));
+  if (!tableau) return std::nullopt;
   // Extract the optimal solution.
-  std::vector<Rational> uses = ExtractSolution(tableau);
+  std::vector<Rational> uses = ExtractSolution(*tableau);
   std::map<std::string_view, Rational> rates = GetRates(input, uses);
   std::map<std::string_view, Rational> inputs, outputs;
   for (const auto& [resource, rate] : rates) {
@@ -305,7 +303,7 @@ Solution Solve(const Input& input) {
                   .uses = std::move(uses),
                   .inputs = std::move(inputs),
                   .outputs = std::move(outputs),
-                  .cost = GetCost(tableau)};
+                  .cost = GetCost(*tableau)};
 }
 
 }  // namespace satisfactory
