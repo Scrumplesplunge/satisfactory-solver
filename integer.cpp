@@ -123,56 +123,6 @@ std::uint32_t Divide(std::span<std::uint32_t> destination,
   return carry;
 }
 
-// quotient = 0
-// remainder = input
-// while ?? {
-//
-// }
-
-class StreamSaver {
- public:
-  StreamSaver(std::ostream& stream)
-      : stream_(stream), flags_(stream.flags()), fill_(stream.fill()) {}
-
-  ~StreamSaver() {
-    stream_.flags(flags_);
-    stream_.fill(fill_);
-  }
-
- private:
-  std::ostream& stream_;
-  std::ios_base::fmtflags flags_;
-  char fill_;
-};
-
-template <typename T> struct Hex { const T& value; };
-template <typename T> Hex(T) -> Hex<T>;
-
-template <typename T>
-std::ostream& operator<<(std::ostream& output, Hex<T> h) {
-  StreamSaver save(output);
-  return output << std::hex << h.value;
-}
-
-struct DebugInt { std::span<const std::uint32_t> value; };
-
-std::ostream& operator<<(std::ostream& output, DebugInt x) {
-  StreamSaver save(output);
-  const int n = x.value.size();
-  output.fill('0');
-  if (x.value.empty()) return output << std::setw(8) << std::hex << 0;
-  bool first = true;
-  for (int i = n - 1; i >= 0; i--) {
-    if (first) {
-      first = false;
-    } else {
-      output << ' ';
-    }
-    output << std::setw(8) << std::hex << x.value[i];
-  }
-  return output;
-}
-
 void DivMod(std::span<std::uint32_t> quotient,
             std::span<std::uint32_t> remainder,
             std::span<const std::uint32_t> divisor) noexcept {
@@ -180,11 +130,7 @@ void DivMod(std::span<std::uint32_t> quotient,
   divisor = Narrow(divisor);
   std::fill(quotient.begin(), quotient.end(), 0);
   assert(!divisor.empty());
-  // std::cout << "divisor = " << DebugInt(divisor) << '\n';
   while (true) {
-    // std::cout << "Begin iteration\n";
-    // std::cout << "quotient = " << DebugInt(quotient) << '\n'
-    //           << "remainder = " << DebugInt(remainder) << '\n';
     // If the remainder is strictly smaller than the divisor, then the quotient
     // is 0 and the remainder is simply the original number.
     if (remainder.size() < divisor.size()) return;
@@ -214,147 +160,20 @@ void DivMod(std::span<std::uint32_t> quotient,
     // the remainder is 0s after the prefix, and the rest of the divisor is 1s
     // after the prefix).
     const std::uint32_t estimate = remainder_prefix / (divisor.back() + 1);
-    // std::cout << "remainder_prefix = " << Hex(remainder_prefix) << '\n'
-    //           << "estimate         = " << estimate << " (base 10), or "
-    //           << Hex(estimate) << " (base 16)\n";
     if (estimate > 1) {
       SubtractMultiple(remainder.subspan(shift), divisor, estimate);
       Add(quotient.subspan(shift), estimate);
-      // std::cout << "->\n"
-      //           << "quotient = " << DebugInt(quotient) << '\n'
-      //           << "remainder = " << DebugInt(remainder) << '\n';
     } else if (Compare(divisor, remainder.subspan(shift)) <= 0) {
       Subtract(remainder.subspan(shift), divisor);
       Add(quotient.subspan(shift), 1);
-      // std::cout << "->\n"
-      //           << "quotient = " << DebugInt(quotient) << '\n'
-      //           << "remainder = " << DebugInt(remainder) << '\n';
     } else {
       assert(estimate == 0);
       assert(shift == 0);
       break;
     }
-    // std::cout << "=======\n";
-    remainder = Narrow(remainder);
-    //assert(Compare(divisor, remainder.subspan(shift)) > 0);
-  }
-}
-
-/*
-  // ATTEMPT 2
-
-  if (divisor.size() == 1) {
-    // For division by a small divisor, use the fast division routine. This will
-    // compute the quotient, so we'll need to copy it from the remainder span to
-    // the quotient span and write the single-digit remainder into the remainder
-    // span afterwards.
-    const std::uint32_t r = Divide(remainder, divisor[0]);
-    const int n = std::min(remainder.size(), quotient.size());
-    std::ranges::copy(remainder.subspan(0, n), quotient.begin());
-    std::ranges::fill(quotient.subspan(n), 0);
-    std::ranges::fill(remainder, 0);
-    remainder[0] = r;
-    return;
-  }
-
-  // If the divisor is longer than the remainder, then it is larger: the
-  // quotient is 0 and the remainder is the input value.
-  if (divisor.size() > remainder.size()) return;
-  assert(divisor.size() >= 2);
-  const std::uint64_t divisor_prefix =
-      std::uint64_t(divisor[divisor.size() - 1]) << 32 |
-      std::uint64_t(divisor[divisor.size() - 2]);
-  std::uint32_t value_copy[32];
-  char buffer[1024];
-  const auto debug = [&](std::span<const std::uint32_t> value) {
-    std::ranges::fill(value_copy, 0);
-    std::ranges::copy(value, value_copy);
-    std::span<char> result = EncodeDecimal(buffer, value_copy);
-    return std::string_view(result.data(), result.size());
-  };
-  std::cout << "divisor = " << debug(divisor) << '\n';
-  std::cout << "divisor_prefix = " << divisor_prefix << '\n';
-  while (remainder.size() >= 2) {
-    std::cout << "tick\n";
-    std::cout << "quotient = " << debug(quotient) << '\n';
-    std::cout << "remainder = " << debug(remainder) << '\n';
-    // Estimate how many times the divisor goes into the remainder.
-    const std::uint64_t remainder_prefix =
-        std::uint64_t(remainder[remainder.size() - 1]) << 32 |
-        std::uint64_t(remainder[remainder.size() - 2]);
-    std::cout << "remainder_prefix = " << remainder_prefix << '\n';
-    // The guess must not overestimate, but it can underestimate, so we assume
-    // the worst case (all digits after the remainder prefix are 0 and all
-    // digits after the divisor prefix are 1), and ensure that we would
-    // underestimate even that by incrementing the divisor prefix.
-    const std::uint64_t guess = remainder_prefix / (divisor_prefix + 1);
-    std::cout << "guess = " << guess << '\n';
-    const int shift = remainder.size() - divisor.size();
-    std::cout << "shift = " << shift << '\n';
-    if (guess) SubtractMultiple(remainder.subspan(shift), divisor, guess);
-    // The error ratio for the guess is at most 1/2^32, since divisor_prefix is
-    // at least 2^32. Furthermore, the guess is strictly less than 2^32, since
-    // both the remainder_prefix and divisor_prefix are greater than 2^32. This
-    // means that the guess is off by at most 1.
-    std::uint64_t factor = guess;
-    if (Compare(divisor, remainder.subspan(shift)) <= 0) {
-      std::cout << "performing additional subtraction\n";
-      Subtract(remainder.subspan(shift), divisor);
-      factor++;
-    }
-    std::uint32_t quotient_delta[] = {std::uint32_t(factor),
-                                      std::uint32_t(factor >> 32)};
-    Add(quotient.subspan(shift), quotient_delta);
-    std::cout << "->\n";
-    std::cout << "factor = " << factor << '\n';
-    std::cout << "quotient = " << debug(quotient) << '\n';
-    std::cout << "remainder = " << debug(remainder) << '\n';
-    assert(factor);
-    assert(Compare(divisor, remainder.subspan(shift)) > 0);
-    //assert(Narrow(remainder).size() < remainder.size());
     remainder = Narrow(remainder);
   }
 }
-
- // ATTEMPT 1
-  while (true) {
-    assert(!remainder.empty());
-    assert(remainder.size() >= divisor.size());
-    std::uint64_t temp = remainder.back();
-    int shift = remainder.size() - divisor.size();
-    // Require that the prefix be strictly bigger than the divisor prefix.
-    if (temp <= divisor.back()) {
-      // If the shift is 0 and the divisor doesn't fit, then all that remains is
-      // the true remainder of the division and so we are done.
-      if (shift == 0) break;
-      temp = temp << 32 | remainder[remainder.size() - 2];
-      shift--;
-    }
-    // Estimate how many times the divisor goes into the remainder, using at
-    // most 64 bits of the remainder and 32 bits of the quotient. This must not
-    // be an overestimate, so we increment the divisor prefix which will force
-    // us to underestimate.
-    const std::uint64_t guess = temp / (std::uint64_t(divisor.back()) + 1);
-    if (guess) {
-      SubtractMultiple(remainder.subspan(shift), divisor, guess);
-    } else if (Compare(divisor, remainder.subspan(shift)) <= 0) {
-      Subtract(remainder.subspan(shift), divisor);
-    } else {
-      
-    }
-    // Since we know that we underestimated, we may have to do one additional
-    // subtraction.
-    //
-    //   k <= divisor
-    //   guess = temp / (divisor + k)
-    //
-    if (Compare(divisor, remainder.subspan(shift)) <= 0) {
-      Subtract(remainder.subspan(shift), divisor);
-    }
-    remainder = Narrow(remainder);
-    assert(Compare(divisor, remainder.subspan(shift)) > 0);
-  }
-} */
 
 void ShiftLeft(std::span<std::uint32_t> value, int amount) noexcept {
   const int major_shift = amount / 32;
