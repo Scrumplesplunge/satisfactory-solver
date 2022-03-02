@@ -1,6 +1,8 @@
 #ifndef RATIONAL_HPP_
 #define RATIONAL_HPP_
 
+#include "integer.hpp"
+
 #include <cassert>
 #include <compare>
 #include <cstdint>
@@ -12,15 +14,18 @@ namespace satisfactory {
 class Rational {
  public:
   constexpr Rational() = default;
-  constexpr Rational(std::int64_t x) : numerator_(x), denominator_(1) {}
-  constexpr Rational(std::int64_t numerator, std::int64_t denominator) noexcept
+
+  template <std::integral T>
+  constexpr Rational(T x) : numerator_(x), denominator_(1) {}
+
+  constexpr Rational(int128 numerator, int128 denominator) noexcept
       : numerator_(numerator), denominator_(denominator) {
     assert(denominator_ > 0);
     Normalize();
   }
 
   explicit operator double() const noexcept {
-    return static_cast<double>(numerator_) / denominator_;
+    return static_cast<double>(numerator_) / static_cast<double>(denominator_);
   }
 
   constexpr Rational Inverse() const noexcept {
@@ -43,11 +48,11 @@ class Rational {
   }
 
   inline friend constexpr Rational operator*(Rational l, Rational r) noexcept {
-    if (std::int64_t x = std::gcd(l.numerator_, r.denominator_); x != 1) {
+    if (int128 x = gcd(l.numerator_, r.denominator_); x != 1) {
       l.numerator_ /= x;
       r.denominator_ /= x;
     }
-    if (std::int64_t x = std::gcd(r.numerator_, l.denominator_); x != 1) {
+    if (int128 x = gcd(r.numerator_, l.denominator_); x != 1) {
       r.numerator_ /= x;
       l.denominator_ /= x;
     }
@@ -81,18 +86,18 @@ class Rational {
     return (*this = *this / other);
   }
 
-  std::int64_t numerator() const noexcept { return numerator_; }
-  std::int64_t denominator() const noexcept { return denominator_; }
+  int128 numerator() const noexcept { return numerator_; }
+  int128 denominator() const noexcept { return denominator_; }
 
  private:
   void Normalize() {
-    const std::int64_t x = std::gcd(numerator_, denominator_);
+    const int128 x = gcd(numerator_, denominator_);
     numerator_ /= x;
     denominator_ /= x;
   }
 
-  std::int64_t numerator_ = 0;
-  std::int64_t denominator_ = 1;
+  int128 numerator_ = 0;
+  int128 denominator_ = 1;
 };
 
 std::ostream& operator<<(std::ostream& output, const Rational& rational);
